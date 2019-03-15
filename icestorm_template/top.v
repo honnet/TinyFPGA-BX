@@ -4,6 +4,8 @@ module top (
     output LED,   // User/boot LED next to power LED
     output USBPU  // USB pull-up resistor
 );
+    parameter CNT_WIDTH= 26;
+
     // drive USB pull-up resistor to '0' to disable USB
     assign USBPU = 0;
 
@@ -12,7 +14,7 @@ module top (
     ////////
 
     // keep track of time and location in blink_pattern
-    reg [25:0] blink_counter;
+    reg [CNT_WIDTH-1:0] blink_counter;
 
     // pattern that will be flashed over the LED over time
     wire [31:0] blink_pattern = 32'b101010001110111011100010101;
@@ -21,7 +23,8 @@ module top (
     always @(posedge CLK) begin
         blink_counter <= blink_counter + 1;
     end
-    
+
     // light up the LED according to the pattern
-    assign LED = blink_pattern[blink_counter[25:21]];
+    assign LED = blink_pattern[blink_counter[CNT_WIDTH-1:CNT_WIDTH-5]];
 endmodule
+
