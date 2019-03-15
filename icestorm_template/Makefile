@@ -19,7 +19,7 @@ PROJ = top
 PIN_DEF = pins.pcf
 DEVICE = lp8k
 
-all: $(PROJ).rpt $(PROJ).bin
+all: compile
 
 %.blif: %.v
 	yosys -p 'synth_ice40 -top $(PROJ) -blif $@' $<
@@ -48,6 +48,15 @@ all: $(PROJ).rpt $(PROJ).bin
 %_syntb.vcd: %_syntb
 	vvp -N $< +vcd=$@
 
+$(PROJ).json: $(PROJ).v
+	yosys -ql $*.log -p 'synth_ice40 -top $(PROJ) -json $@' $<
+
+
+compile: $(PROJ).rpt $(PROJ).bin
+
+view: compile $(PROJ).json
+	yosys -p show $(PROJ).json
+
 prog: $(PROJ).bin
 	tinyprog -p $<
 
@@ -56,7 +65,8 @@ sudo-prog: $(PROJ).bin
 	sudo tinyprog -p $<
 
 clean:
-	rm -f $(PROJ).blif $(PROJ).asc $(PROJ).rpt $(PROJ).bin
+	rm -f $(PROJ).blif $(PROJ).asc $(PROJ).rpt $(PROJ).bin $(PROJ).json
 
 .SECONDARY:
-.PHONY: all prog clean
+.PHONY: all compile view prog clean
+
