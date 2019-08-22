@@ -52,10 +52,14 @@ $(PROJ).json: $(PROJ).v
 	yosys -ql $*.log -p 'synth_ice40 -top $(PROJ) -json $@' $<
 
 
-compile: $(PROJ).rpt $(PROJ).bin
+compile: $(PROJ).rpt $(PROJ).bin view-rtl
 
-view: compile $(PROJ).json
-	yosys -p show $(PROJ).json
+view-rtl: $(PROJ).v
+	yosys -p 'read_verilog $<; hierarchy -check; proc; opt; fsm; opt; memory; opt; show'
+
+view-coarse: $(PROJ).v
+	yosys -p 'read_verilog $<; hierarchy -check; proc; opt; fsm; opt; memory; opt' \
+          -p 'extract -map $<; show'
 
 prog: $(PROJ).bin
 	tinyprog -p $<
